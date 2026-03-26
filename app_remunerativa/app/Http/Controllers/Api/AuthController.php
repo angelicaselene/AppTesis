@@ -24,6 +24,9 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Detectar primer ingreso: la contraseña actual es igual al DNI
+        $primerIngreso = Hash::check($user->dni, $user->password);
+
         // Revocar tokens anteriores y crear uno nuevo
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -31,6 +34,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login correcto',
             'token'   => $token,
+            'primer_ingreso' => $primerIngreso,
             'user'    => [
                 'id'      => $user->id,
                 'nombres' => $user->nombres,

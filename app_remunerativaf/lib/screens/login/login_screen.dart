@@ -5,6 +5,8 @@ import 'forgot_password_screen.dart';
 import '../home/home_screen.dart';
 import '../directorio/directorio_screen.dart';
 import '../trabajador/trabajador_screen.dart';
+import 'cambiar_password_screen.dart';
+import 'registro_contacto_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,19 +37,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result['status'] == 200) {
       if (mounted) {
-        final rol = result['data']['user']['rol'];
-        final email = result['data']['user']['email'];
+        final data = result['data'];
+        final rol = data['user']['rol'];
+        final email = data['user']['email'];
+        final dni = data['user']['dni'];
+        final primerIngreso = data['primer_ingreso'] ?? false;
 
-      // Si no tiene email, ir a registrar primero
+      // Paso 1: Si es primer ingreso → cambiar contraseña obligatoriamente
+      if (primerIngreso) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CambiarPasswordScreen(rol: rol, dni: dni),
+          ),
+        );
+        return;
+      }
+
+      // Paso 2: Si ya cambió contraseña pero no tiene email → registrar contacto
       if (email == null || email.toString().isEmpty) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => RegistroEmailScreen(rol: rol),
+            builder: (_) => RegistroContactoScreen(rol: rol),
           ),
         );
         return;
-      } 
+      }
       
         if (rol == 'DIR') {
           Navigator.pushReplacement(

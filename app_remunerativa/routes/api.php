@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PrimerIngresoController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\RegistroEmailController;
 use App\Http\Controllers\Api\ExcelController;
@@ -26,7 +27,8 @@ Route::post('/forgot-password/reset',      [PasswordResetController::class, 'res
 
 // Rutas protegidas con Sanctum
 Route::middleware('auth:sanctum')->group(function () {
-
+    Route::post('/primer-ingreso/cambiar-password', [PrimerIngresoController::class, 'cambiarPassword']);
+    Route::post('/primer-ingreso/registrar-contacto', [PrimerIngresoController::class, 'registrarContacto']);
     Route::post('/registro-email', [RegistroEmailController::class, 'registrar']);
     Route::post('/usuarios/{id}/reset-password', [UsuariosController::class, 'resetPassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
