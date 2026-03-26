@@ -47,6 +47,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -54,6 +61,27 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+  # Ícono de la app
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  remove_alpha_ios: true
+
+# Splash screen
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/icon/icon.png
+  android_gravity: center
+  ios_content_mode: center
+  
+  # Controla el tamaño (porcentaje de la pantalla)
+  android_12:
+    image: assets/icon/icon.png
+    color: "#FFFFFF"
+    icon_background_color: "#FFFFFF"
+    image_percent: 0.7 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -64,6 +92,7 @@ flutter:
   assets:
     - assets/logo_uss.png
     - assets/sello_certificacion.png
+    - assets/icon/icon.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

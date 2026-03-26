@@ -43,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
         final dni = data['user']['dni'];
         final primerIngreso = data['primer_ingreso'] ?? false;
 
-      // Paso 1: Si es primer ingreso → cambiar contraseña obligatoriamente
       if (primerIngreso) {
         Navigator.pushReplacement(
           context,
@@ -54,7 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Paso 2: Si ya cambió contraseña pero no tiene email → registrar contacto
       if (email == null || email.toString().isEmpty) {
         Navigator.pushReplacement(
           context,
@@ -64,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         return;
       }
-      
+
         if (rol == 'DIR') {
           Navigator.pushReplacement(
             context,
@@ -206,7 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GestureDetector(
+                  Center(
+                  child: GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -221,6 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: TextDecoration.underline,
                       ),
                     ),
+                  ),
                   ),
                   const SizedBox(height: 32),
                 ],
