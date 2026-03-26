@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import 'registro_email_screen.dart';
+import 'forgot_password_screen.dart';
 import '../home/home_screen.dart';
 import '../directorio/directorio_screen.dart';
 import '../trabajador/trabajador_screen.dart';
@@ -34,6 +36,19 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['status'] == 200) {
       if (mounted) {
         final rol = result['data']['user']['rol'];
+        final email = result['data']['user']['email'];
+
+      // Si no tiene email, ir a registrar primero
+      if (email == null || email.toString().isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegistroEmailScreen(rol: rol),
+          ),
+        );
+        return;
+      } 
+      
         if (rol == 'DIR') {
           Navigator.pushReplacement(
             context,
@@ -175,10 +190,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Center(
-                    child: Text(
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      );
+                    },
+                    child: const Text(
                       'Olvidó su contraseña?',
-                      style: TextStyle(color: Colors.black54),
+                      style: TextStyle(
+                        color: Color(0xFF6B2D8B),
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),

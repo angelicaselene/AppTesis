@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\RegistroEmailController;
 use App\Http\Controllers\Api\ExcelController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\HomeController;
@@ -17,9 +19,16 @@ use App\Http\Controllers\Api\DetalleEscalaController;
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
 
+// Nuevas rutas públicas para recuperar contraseña
+Route::post('/forgot-password/send-otp',   [PasswordResetController::class, 'sendOtp']);
+Route::post('/forgot-password/verify-otp', [PasswordResetController::class, 'verifyOtp']);
+Route::post('/forgot-password/reset',      [PasswordResetController::class, 'resetPassword']);
+
 // Rutas protegidas con Sanctum
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('/registro-email', [RegistroEmailController::class, 'registrar']);
+    Route::post('/usuarios/{id}/reset-password', [UsuariosController::class, 'resetPassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Perfil del usuario autenticado

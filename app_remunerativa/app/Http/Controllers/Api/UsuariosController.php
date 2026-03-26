@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\ClasificacionPuesto;
 use App\Models\ValuacionPuesto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PasswordResetedMail;
 
 class UsuariosController extends Controller
 {
@@ -64,6 +67,37 @@ class UsuariosController extends Controller
         });
 
         return response()->json($usuarios);
+    }
+
+    public function resetPassword(Request $request, $id)
+    {
+        // Solo RR.HH puede resetear contraseñas
+        $rolUsuario = $request->user()->rol->nombre ?? '';
+        if ($rolUsuario !== 'RR.HH') {
+            return response()->json([
+                'message' => 'No tienes permisos para realizar esta acción.'
+            ], 403);
+        }
+
+        $usuario = User::findOrFail($id);
+
+        // Resetear contraseña al DNI
+        $usuario->update([
+            'password' => Hash::make($usuario->dni),
+        ]);
+
+        // Notificar por email si tiene correo registrado
+        if ($usuario->email) {
+            Mail::to($usuario->email)->send(
+                new PasswordResetedMail($usuario->nombres, $usuario->dni)
+            );
+        }
+
+        return response()->json([
+            'message'        => 'Contraseña reseteada correctamente.',
+            'tiene_email'    => !is_null($usuario->email),
+            'notificado'     => !is_null($usuario->email),
+        ]);
     }
 
     public function valuacion(Request $request, $id)

@@ -36,6 +36,7 @@ class AuthController extends Controller
                 'nombres' => $user->nombres,
                 'dni'     => $user->dni,
                 'rol'     => $user->rol->nombre,
+                'email'   => $user->email,
             ],
         ]);
     }
