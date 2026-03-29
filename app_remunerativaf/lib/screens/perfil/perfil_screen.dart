@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../services/api_service.dart';
-import '../login/login_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   final String nombres;
@@ -38,6 +37,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
       _telefonoController.text = data['telefono'] ?? '';
       _loading = false;
     });
+  }
+
+  String _fixUrl(String? url) {
+    if (url == null) return '';
+    return url.replaceAll('127.0.0.1', '10.0.2.2');
   }
 
   Future<void> _seleccionarFoto() async {
@@ -167,7 +171,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                     backgroundImage: _fotoLocal != null
                                         ? FileImage(_fotoLocal!) as ImageProvider
                                         : _perfil?['foto_url'] != null
-                                            ? NetworkImage(_perfil!['foto_url'])
+                                            ? NetworkImage(_fixUrl(_perfil!['foto_url']))
                                             : null,
                                     child: _fotoLocal == null &&
                                             _perfil?['foto_url'] == null
@@ -232,8 +236,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 11)),
                                   Text(
-                                      _perfil!['clasificacion']['categoria'] ??
-                                          '',
+                                      _perfil!['clasificacion']['categoria'] ?? '',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -361,8 +364,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       child: Row(
         children: [
           Text('$label: ',
-              style:
-                  const TextStyle(color: Colors.black54, fontSize: 14)),
+              style: const TextStyle(color: Colors.black54, fontSize: 14)),
           Expanded(
               child: Text(valor, style: const TextStyle(fontSize: 14))),
         ],
