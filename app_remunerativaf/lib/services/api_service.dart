@@ -176,10 +176,18 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getDetalleEscala() async {
-  final response = await http.get(
-    Uri.parse('${ApiConfig.baseUrl}/detalle-escala'),
-    headers: await _headers(),
-  );
-  return jsonDecode(response.body);
-}
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/detalle-escala'),
+      headers: await _headers(),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<List<dynamic>> getHistorialRemuneracion() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/historial-remuneracion'),
+      headers: await _headers(),
+    );
+    return jsonDecode(response.body);
+  }
 }

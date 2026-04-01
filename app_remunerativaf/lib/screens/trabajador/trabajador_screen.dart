@@ -10,7 +10,8 @@ import 'mi_puesto_salario_screen.dart';
 import 'valoracion_puestos_screen.dart';
 // ignore: unused_import
 import '../home/beneficios_screen.dart';
-
+// ignore: unused_import
+import 'historial_screen.dart';
 
 
 class TrabajadorScreen extends StatefulWidget {
@@ -250,7 +251,14 @@ class _TrabajadorScreenState extends State<TrabajadorScreen> {
                         _buildModulo(
                           'Mi historial',
                           Icons.article_outlined,
-                          () {},
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => HistorialScreen(nombres: nombres),
+                              ),
+                            );
+                          },
                         ),
                         _buildModulo(
                           'Beneficios',

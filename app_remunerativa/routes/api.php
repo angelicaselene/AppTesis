@@ -57,6 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/perfil/escala-rangos', [PerfilController::class, 'escalaRangos']);
     Route::get('/analisis-salarial/rangos', [AnalisisSalarialController::class, 'rangos']);
     Route::get('/detalle-escala', [DetalleEscalaController::class, 'index']);
-
+    Route::get('/historial-remuneracion', [HistorialController::class, 'remuneracion']);
 
 });

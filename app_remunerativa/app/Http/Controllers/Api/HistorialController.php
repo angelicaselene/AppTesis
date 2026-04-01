@@ -23,4 +23,16 @@ class HistorialController extends Controller
 
         return response()->json($historial);
     }
+
+    public function remuneracion(Request $request)
+{
+    $dni = $request->user()->dni;
+
+    $historial = \App\Models\HistorialRemuneracion::where('dni', $dni)
+        ->orderBy('anio', 'asc')
+        ->orderByRaw("FIELD(mes, 'ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE')")
+        ->get();
+
+    return response()->json($historial);
+}
 }
