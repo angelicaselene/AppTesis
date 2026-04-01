@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../../services/api_service.dart';
 
 class PerfilScreen extends StatefulWidget {
@@ -31,17 +33,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Future<void> _cargarPerfil() async {
     final data = await ApiService.getPerfil();
+    final prefs = await SharedPreferences.getInstance();
+    final fotoGuardada = prefs.getString('foto_perfil');
+
     setState(() {
       _perfil = data;
+      if (fotoGuardada != null) {
+        _perfil?['foto_local'] = fotoGuardada;
+      }
       _emailController.text = data['email'] ?? '';
       _telefonoController.text = data['telefono'] ?? '';
       _loading = false;
     });
-  }
-
-  String _fixUrl(String? url) {
-    if (url == null) return '';
-    return url.replaceAll('127.0.0.1', '10.0.2.2');
   }
 
   Future<void> _seleccionarFoto() async {
@@ -76,26 +79,31 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Future<void> _tomarFoto(ImageSource source) async {
     final picked = await _picker.pickImage(
       source: source,
-      maxWidth: 800,
-      imageQuality: 80,
+      maxWidth: 400,
+      imageQuality: 50,
     );
     if (picked == null) return;
 
     setState(() => _subiendoFoto = true);
 
-    final result = await ApiService.updateFoto(picked.path);
+    // Guardar en SharedPreferences localmente
+    final bytes = await File(picked.path).readAsBytes();
+    final base64Str = base64Encode(bytes);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('foto_perfil', base64Str);
+
+    // También subir al servidor
+    await ApiService.updateFoto(picked.path);
 
     setState(() {
       _subiendoFoto = false;
-      if (result['foto_url'] != null) {
-        _fotoLocal = File(picked.path);
-        _perfil?['foto_url'] = result['foto_url'];
-      }
+      _fotoLocal = File(picked.path);
+      _perfil?['foto_local'] = base64Str;
     });
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Foto actualizada')),
+        const SnackBar(content: Text('Foto actualizada correctamente')),
       );
     }
   }
@@ -115,6 +123,51 @@ class _PerfilScreenState extends State<PerfilScreen> {
         SnackBar(content: Text(result['message'] ?? 'Actualizado')),
       );
     }
+  }
+
+  Widget _buildAvatar() {
+    if (_subiendoFoto) {
+      return const CircleAvatar(
+        radius: 50,
+        backgroundColor: Color(0xFFE0E0E0),
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_fotoLocal != null) {
+      return ClipOval(
+        child: Image.file(
+          _fotoLocal!,
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    // Cargar desde SharedPreferences
+    final fotoLocal = _perfil?['foto_local'];
+    if (fotoLocal != null) {
+      try {
+        final bytes = base64Decode(fotoLocal);
+        return ClipOval(
+          child: Image.memory(
+            bytes,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (e) {
+        print('Error decodificando foto local: $e');
+      }
+    }
+
+    return const CircleAvatar(
+      radius: 50,
+      backgroundColor: Color(0xFFE0E0E0),
+      child: Icon(Icons.person, size: 60, color: Colors.grey),
+    );
   }
 
   @override
@@ -155,33 +208,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        // Avatar con botón de editar foto
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
-                            _subiendoFoto
-                                ? const CircleAvatar(
-                                    radius: 50,
-                                    backgroundColor: Color(0xFFE0E0E0),
-                                    child: CircularProgressIndicator(),
-                                  )
-                                : CircleAvatar(
-                                    radius: 50,
-                                    backgroundColor: const Color(0xFFE0E0E0),
-                                    backgroundImage: _fotoLocal != null
-                                        ? FileImage(_fotoLocal!) as ImageProvider
-                                        : _perfil?['foto_url'] != null
-                                            ? NetworkImage(_fixUrl(_perfil!['foto_url']))
-                                            : null,
-                                    child: _fotoLocal == null &&
-                                            _perfil?['foto_url'] == null
-                                        ? const Icon(
-                                            Icons.person,
-                                            size: 60,
-                                            color: Colors.grey,
-                                          )
-                                        : null,
-                                  ),
+                            _buildAvatar(),
                             GestureDetector(
                               onTap: _seleccionarFoto,
                               child: Container(
@@ -216,7 +246,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Clasificación
                         if (_perfil?['clasificacion'] != null)
                           Container(
                             width: double.infinity,
@@ -233,10 +262,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                               children: [
                                 Column(children: [
                                   const Text('Categoría:',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 11)),
-                                  Text(
-                                      _perfil!['clasificacion']['categoria'] ?? '',
+                                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                                  Text(_perfil!['clasificacion']['categoria'] ?? '',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -244,10 +271,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                 ]),
                                 Column(children: [
                                   const Text('Perfil:',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 11)),
-                                  Text(
-                                      _perfil!['clasificacion']['perfil'] ?? '',
+                                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                                  Text(_perfil!['clasificacion']['perfil'] ?? '',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -255,10 +280,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                 ]),
                                 Column(children: [
                                   const Text('Nivel:',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 11)),
-                                  Text(
-                                      _perfil!['clasificacion']['nivel'] ?? '',
+                                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                                  Text(_perfil!['clasificacion']['nivel'] ?? '',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -270,7 +293,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
                         const SizedBox(height: 20),
 
-                        // Info personal
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -281,15 +303,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                             children: [
                               _campoInfo('DNI', _perfil?['dni'] ?? ''),
                               const Divider(),
-                              _campoEditable(
-                                  'Teléfono', _telefonoController, _editando),
+                              _campoEditable('Teléfono', _telefonoController, _editando),
                               const Divider(),
-                              _campoEditable('Correo electrónico',
-                                  _emailController, _editando),
+                              _campoEditable('Correo electrónico', _emailController, _editando),
                               const Divider(),
-                              _campoInfo(
-                                  'Fecha de Nacimiento',
-                                  _perfil?['fecha_nac'] ?? ''),
+                              _campoInfo('Fecha de Nacimiento', _perfil?['fecha_nac'] ?? ''),
                             ],
                           ),
                         ),
@@ -308,8 +326,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                     borderRadius: BorderRadius.circular(12)),
                               ),
                               child: const Text('Editar',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16)),
+                                  style: TextStyle(color: Colors.white, fontSize: 16)),
                             ),
                           )
                         else
@@ -317,13 +334,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                             children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () =>
-                                      setState(() => _editando = false),
+                                  onPressed: () => setState(() => _editando = false),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.grey,
                                     shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
+                                        borderRadius: BorderRadius.circular(12)),
                                   ),
                                   child: const Text('Cancelar',
                                       style: TextStyle(color: Colors.white)),
@@ -336,15 +351,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF7DC242),
                                     shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
+                                        borderRadius: BorderRadius.circular(12)),
                                   ),
                                   child: _guardando
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.white)
+                                      ? const CircularProgressIndicator(color: Colors.white)
                                       : const Text('Guardar',
-                                          style:
-                                              TextStyle(color: Colors.white)),
+                                          style: TextStyle(color: Colors.white)),
                                 ),
                               ),
                             ],
@@ -365,15 +377,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
         children: [
           Text('$label: ',
               style: const TextStyle(color: Colors.black54, fontSize: 14)),
-          Expanded(
-              child: Text(valor, style: const TextStyle(fontSize: 14))),
+          Expanded(child: Text(valor, style: const TextStyle(fontSize: 14))),
         ],
       ),
     );
   }
 
-  Widget _campoEditable(
-      String label, TextEditingController controller, bool editable) {
+  Widget _campoEditable(String label, TextEditingController controller, bool editable) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: editable
@@ -381,16 +391,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
               controller: controller,
               decoration: InputDecoration(
                 labelText: label,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 isDense: true,
               ),
             )
           : Row(
               children: [
                 Text('$label: ',
-                    style: const TextStyle(
-                        color: Colors.black54, fontSize: 14)),
+                    style: const TextStyle(color: Colors.black54, fontSize: 14)),
                 Expanded(
                   child: Text(
                     controller.text.isEmpty ? 'Sin datos' : controller.text,

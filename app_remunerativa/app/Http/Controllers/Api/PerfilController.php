@@ -29,7 +29,7 @@ class PerfilController extends Controller
             'telefono'  => $user->telefono,
             'fecha_nac' => $user->fecha_nac,
             'rol'       => $user->rol->nombre ?? null,
-            'foto_url'  => $user->foto ? asset('storage/' . $user->foto) : null,
+            'foto_url'  => $user->foto ?? null,
             'contrato'  => $user->contrato ? [
                 'cargo'         => $user->contrato->cargo->nombre ?? null,
                 'departamento'  => $user->contrato->departamento->nombre ?? null,
@@ -67,25 +67,23 @@ class PerfilController extends Controller
     }
 
     public function updateFoto(Request $request)
-    {
-        $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+{
+    $request->validate([
+        'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
+    
+    $file = $request->file('foto');
+    $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+    
+    $user->update(['foto' => $base64]);
 
-        if ($user->foto && Storage::disk('public')->exists($user->foto)) {
-            Storage::disk('public')->delete($user->foto);
-        }
-
-        $path = $request->file('foto')->store('fotos', 'public');
-        $user->update(['foto' => $path]);
-
-        return response()->json([
-            'message'  => 'Foto actualizada correctamente',
-            'foto_url' => asset('storage/' . $path),
-        ]);
-    }
+    return response()->json([
+        'message'  => 'Foto actualizada correctamente',
+        'foto_url' => $base64,
+    ]);
+}
 
     public function escalaRangos(Request $request)
     {
