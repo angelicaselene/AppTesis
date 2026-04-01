@@ -30,22 +30,22 @@ class _PerfilScreenState extends State<PerfilScreen> {
     super.initState();
     _cargarPerfil();
   }
+Future<void> _cargarPerfil() async {
+  final data = await ApiService.getPerfil();
+  final prefs = await SharedPreferences.getInstance();
+  final dni = data['dni'] ?? '';
+  final fotoGuardada = prefs.getString('foto_perfil_$dni');
 
-  Future<void> _cargarPerfil() async {
-    final data = await ApiService.getPerfil();
-    final prefs = await SharedPreferences.getInstance();
-    final fotoGuardada = prefs.getString('foto_perfil');
-
-    setState(() {
-      _perfil = data;
-      if (fotoGuardada != null) {
-        _perfil?['foto_local'] = fotoGuardada;
-      }
-      _emailController.text = data['email'] ?? '';
-      _telefonoController.text = data['telefono'] ?? '';
-      _loading = false;
-    });
-  }
+  setState(() {
+    _perfil = data;
+    if (fotoGuardada != null) {
+      _perfil?['foto_local'] = fotoGuardada;
+    }
+    _emailController.text = data['email'] ?? '';
+    _telefonoController.text = data['telefono'] ?? '';
+    _loading = false;
+  });
+}
 
   Future<void> _seleccionarFoto() async {
     showModalBottomSheet(
@@ -77,36 +77,35 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _tomarFoto(ImageSource source) async {
-    final picked = await _picker.pickImage(
-      source: source,
-      maxWidth: 400,
-      imageQuality: 50,
+  final picked = await _picker.pickImage(
+    source: source,
+    maxWidth: 400,
+    imageQuality: 50,
+  );
+  if (picked == null) return;
+
+  setState(() => _subiendoFoto = true);
+
+  final bytes = await File(picked.path).readAsBytes();
+  final base64Str = base64Encode(bytes);
+  final prefs = await SharedPreferences.getInstance();
+  final dni = _perfil?['dni'] ?? '';
+  await prefs.setString('foto_perfil_$dni', base64Str);
+
+  await ApiService.updateFoto(picked.path);
+
+  setState(() {
+    _subiendoFoto = false;
+    _fotoLocal = File(picked.path);
+    _perfil?['foto_local'] = base64Str;
+  });
+
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Foto actualizada correctamente')),
     );
-    if (picked == null) return;
-
-    setState(() => _subiendoFoto = true);
-
-    // Guardar en SharedPreferences localmente
-    final bytes = await File(picked.path).readAsBytes();
-    final base64Str = base64Encode(bytes);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('foto_perfil', base64Str);
-
-    // También subir al servidor
-    await ApiService.updateFoto(picked.path);
-
-    setState(() {
-      _subiendoFoto = false;
-      _fotoLocal = File(picked.path);
-      _perfil?['foto_local'] = base64Str;
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto actualizada correctamente')),
-      );
-    }
   }
+}
 
   Future<void> _guardar() async {
     setState(() => _guardando = true);
