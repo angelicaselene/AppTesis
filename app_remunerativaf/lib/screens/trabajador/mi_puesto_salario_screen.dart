@@ -13,6 +13,7 @@ class MiPuestoSalarioScreen extends StatefulWidget {
 class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
   Map<String, dynamic>? _perfil;
   Map<String, dynamic>? _valuacion;
+  List<dynamic> _historial = [];
   bool _loading = true;
 
   @override
@@ -27,9 +28,11 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
     if (perfil['id'] != null) {
       valuacion = await ApiService.getValuacion(perfil['id']);
     }
+    final historial = await ApiService.getHistorialRemuneracion();
     setState(() {
       _perfil = perfil;
       _valuacion = valuacion;
+      _historial = historial;
       _loading = false;
     });
   }
@@ -63,6 +66,33 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
     return nombreCompleto;
   }
 
+  // Construye los puntos del gráfico desde el historial real
+  List<FlSpot> _buildSpots() {
+    if (_historial.isEmpty) return [FlSpot(0, 0)];
+
+    // Tomar máximo 6 puntos para no saturar el gráfico
+    final items = _historial.length > 6
+        ? _historial.sublist(_historial.length - 6)
+        : _historial;
+
+    return items.asMap().entries.map((e) {
+      final rem = double.tryParse(e.value['remuneracion']?.toString() ?? '0') ?? 0;
+      return FlSpot(e.key.toDouble(), rem);
+    }).toList();
+  }
+
+  List<String> _buildLabels() {
+    if (_historial.isEmpty) return [];
+    final items = _historial.length > 6
+        ? _historial.sublist(_historial.length - 6)
+        : _historial;
+    return items.map((e) {
+      final mes = (e['mes']?.toString() ?? '').substring(0, 3);
+      final anio = e['anio']?.toString() ?? '';
+      return '$mes\n$anio';
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final clasificacion = _perfil?['clasificacion'];
@@ -77,9 +107,7 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
         children: [
           Container(
             color: const Color(0xFF6B2D8B),
-            padding: const EdgeInsets.only(
-              top: 50, left: 20, right: 20, bottom: 16,
-            ),
+            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 16),
             child: Row(
               children: [
                 IconButton(
@@ -135,10 +163,7 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                               const SizedBox(height: 8),
                               Text(
                                 contrato?['cargo'] ?? 'Sin cargo',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -153,45 +178,17 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                         // 4 cards info
                         Row(
                           children: [
-                            Expanded(
-                              child: _infoCard(
-                                Icons.work_outline,
-                                'Puesto Actual',
-                                contrato?['cargo'] ?? 'N/A',
-                                const Color(0xFF6B2D8B),
-                              ),
-                            ),
+                            Expanded(child: _infoCard(Icons.work_outline, 'Puesto Actual', contrato?['cargo'] ?? 'N/A', const Color(0xFF6B2D8B))),
                             const SizedBox(width: 12),
-                            Expanded(
-                              child: _infoCard(
-                                Icons.track_changes_outlined,
-                                'Valor del Puesto (Puntos)',
-                                'Puntos $puntos',
-                                const Color(0xFF6B2D8B),
-                              ),
-                            ),
+                            Expanded(child: _infoCard(Icons.track_changes_outlined, 'Valor del Puesto (Puntos)', 'Puntos $puntos', const Color(0xFF6B2D8B))),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            Expanded(
-                              child: _infoCard(
-                                Icons.attach_money,
-                                'Salario Actual (S/)',
-                                'S/ $salario',
-                                const Color(0xFF7DC242),
-                              ),
-                            ),
+                            Expanded(child: _infoCard(Icons.attach_money, 'Salario Actual (S/)', 'S/ $salario', const Color(0xFF7DC242))),
                             const SizedBox(width: 12),
-                            Expanded(
-                              child: _infoCard(
-                                Icons.trending_up,
-                                'Banda Salarial',
-                                banda,
-                                const Color(0xFF6B2D8B),
-                              ),
-                            ),
+                            Expanded(child: _infoCard(Icons.trending_up, 'Banda Salarial', banda, const Color(0xFF6B2D8B))),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -209,10 +206,7 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                             children: [
                               Text(
                                 'Posicionamiento Salarial en mi Banda ($banda)',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 4),
                               const Text(
@@ -220,16 +214,13 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                                 style: TextStyle(fontSize: 11, color: Colors.black54),
                               ),
                               const SizedBox(height: 16),
-                              SizedBox(
-                                height: 220,
-                                child: _buildBarChart(salario, banda),
-                              ),
+                              SizedBox(height: 220, child: _buildBarChart(salario, banda)),
                             ],
                           ),
                         ),
                         const SizedBox(height: 20),
 
-                        // Gráfico evolución salarial
+                        // Gráfico evolución salarial con datos reales
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -242,16 +233,23 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                             children: [
                               const Text(
                                 'Evolución Salarial',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Basado en tu historial de remuneraciones.',
+                                style: TextStyle(fontSize: 11, color: Colors.black54),
                               ),
                               const SizedBox(height: 16),
-                              SizedBox(
-                                height: 180,
-                                child: _buildLineChart(salario),
-                              ),
+                              if (_historial.isEmpty)
+                                const Center(
+                                  child: Text(
+                                    'Sin datos de historial disponibles',
+                                    style: TextStyle(color: Colors.black45, fontSize: 13),
+                                  ),
+                                )
+                              else
+                                SizedBox(height: 200, child: _buildLineChart()),
                             ],
                           ),
                         ),
@@ -277,18 +275,11 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
         children: [
           Icon(icono, color: color, size: 22),
           const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.black54),
-          ),
+          Text(label, style: const TextStyle(fontSize: 10, color: Colors.black54)),
           const SizedBox(height: 4),
           Text(
             valor,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -299,8 +290,6 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
 
   Widget _buildBarChart(dynamic salario, String banda) {
     final salarioActual = double.tryParse(salario.toString()) ?? 0;
-
-    // Rangos estimados por banda
     double minimo, medio, maximo;
     switch (banda) {
       case 'MASTER':
@@ -318,9 +307,9 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
         alignment: BarChartAlignment.spaceAround,
         maxY: maximo * 1.3,
         barGroups: [
-          _barGroup(0, minimo, salarioActual, 'Mínimo'),
-          _barGroup(1, medio, salarioActual, 'Medio'),
-          _barGroup(2, maximo, salarioActual, 'Máximo'),
+          _barGroup(0, minimo, salarioActual),
+          _barGroup(1, medio, salarioActual),
+          _barGroup(2, maximo, salarioActual),
         ],
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
@@ -338,10 +327,7 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 const labels = ['Mínimo', 'Medio', 'Máximo'];
-                return Text(
-                  labels[value.toInt()],
-                  style: const TextStyle(fontSize: 11),
-                );
+                return Text(labels[value.toInt()], style: const TextStyle(fontSize: 11));
               },
             ),
           ),
@@ -354,41 +340,27 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
     );
   }
 
-  BarChartGroupData _barGroup(int x, double rango, double salarioActual, String label) {
+  BarChartGroupData _barGroup(int x, double rango, double salarioActual) {
     return BarChartGroupData(
       x: x,
       barRods: [
-        BarChartRodData(
-          toY: rango,
-          color: const Color(0xFF7DC242),
-          width: 20,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        BarChartRodData(
-          toY: salarioActual,
-          color: Colors.black87,
-          width: 20,
-          borderRadius: BorderRadius.circular(4),
-        ),
+        BarChartRodData(toY: rango, color: const Color(0xFF7DC242), width: 20, borderRadius: BorderRadius.circular(4)),
+        BarChartRodData(toY: salarioActual, color: Colors.black87, width: 20, borderRadius: BorderRadius.circular(4)),
       ],
     );
   }
 
-  Widget _buildLineChart(dynamic salario) {
-    final salarioActual = double.tryParse(salario.toString()) ?? 0;
-    final spots = [
-      FlSpot(0, salarioActual * 0.7),
-      FlSpot(1, salarioActual * 0.8),
-      FlSpot(2, salarioActual * 0.9),
-      FlSpot(3, salarioActual),
-    ];
+  Widget _buildLineChart() {
+    final spots = _buildSpots();
+    final labels = _buildLabels();
+    final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b) * 1.2;
 
     return LineChart(
       LineChartData(
         minX: 0,
-        maxX: 3,
+        maxX: (spots.length - 1).toDouble(),
         minY: 0,
-        maxY: salarioActual * 1.2,
+        maxY: maxY,
         gridData: FlGridData(
           show: true,
           getDrawingHorizontalLine: (v) => FlLine(color: Colors.grey.shade200, strokeWidth: 1),
@@ -399,16 +371,28 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 36,
               getTitlesWidget: (value, meta) {
-                const years = ['2022', '2023', '2024', '2025'];
+                final idx = value.toInt();
+                if (idx < 0 || idx >= labels.length) return const SizedBox();
                 return Text(
-                  years[value.toInt()],
-                  style: const TextStyle(fontSize: 10, color: Colors.black54),
+                  labels[idx],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 9, color: Colors.black54),
                 );
               },
             ),
           ),
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 48,
+              getTitlesWidget: (value, meta) => Text(
+                'S/${value.toInt()}',
+                style: const TextStyle(fontSize: 9, color: Colors.black54),
+              ),
+            ),
+          ),
           topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
