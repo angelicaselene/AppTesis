@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor:Colors.white,
       body: Stack(
         children: [
           Positioned(
@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
             right: 16,
             child: Image.asset(
               'assets/sello_certificacion.png',
-              width: 70,
+              width: 90,
             ),
           ),
           SingleChildScrollView(
@@ -107,9 +107,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 160),
+                  const SizedBox(height: 200),
                   Center(
-                    child: Image.asset('assets/logo_uss.png', width: 220),
+                    child: Image.asset('assets/logo_uss.png', width: 300),
                   ),
                   const SizedBox(height: 24),
                   const Center(
@@ -132,49 +132,59 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 32),
                   const Text(
                     'Usuario',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: _dniController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'DNI',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                TextField(
+                  controller: _dniController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'DNI',
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(
+                      Icons.person_outline_rounded,
+                      color: Color(0xFF7DC242),
+                      size: 25,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                ),
                   const SizedBox(height: 16),
                   const Text(
                     'Contraseña',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: '••••••••••••••••',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      color: Color(0xFF6B2D8B),
+                      size: 25,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
                       ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                      onPressed: () => setState(
+                        () => _obscurePassword = !_obscurePassword,
                       ),
                     ),
                   ),
+                ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     Text(_error!, style: const TextStyle(color: Colors.red)),
@@ -216,8 +226,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Olvidó su contraseña?',
                       style: TextStyle(
                         color: Color(0xFF6B2D8B),
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.underline,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                   ),

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
-class ValorizacionScreen extends StatelessWidget {
+class ValorizacionScreen extends StatefulWidget {
   final String nombres;
   const ValorizacionScreen({super.key, required this.nombres});
+
+  @override
+  State<ValorizacionScreen> createState() => _ValorizacionScreenState();
+}
+
+class _ValorizacionScreenState extends State<ValorizacionScreen> {
+  // Mapa de estado expandido por clave "factorIndex-subfactorIndex"
+  final Map<String, bool> _expanded = {};
 
   static const List<Map<String, dynamic>> _factores = [
     {
@@ -10,20 +18,12 @@ class ValorizacionScreen extends StatelessWidget {
       'subfactores': [
         {
           'nombre': 'Formación Profesional',
-          'descripcion':
-              'Valora los conocimientos académicos necesarios para ejercer con efectividad las responsabilidades de un puesto y alcanzar los resultados previstos.',
-          'niveles': [
-            'Doctorado - PHD',
-            'Maestría (as)',
-            'Titulado',
-            'Bachiller Universitario',
-            'Técnico o menos',
-          ],
+          'descripcion': 'Valora los conocimientos académicos necesarios para ejercer con efectividad las responsabilidades de un puesto y alcanzar los resultados previstos.',
+          'niveles': ['Doctorado - PHD', 'Maestría (as)', 'Titulado', 'Bachiller Universitario', 'Técnico o menos'],
         },
         {
           'nombre': 'Investigación',
-          'descripcion':
-              'Valora los aportes de investigacion que son necesarios para ejercer con efectividad las responsabilidades de un puesto y alcanzar los resultados previstos por la Universidad.',
+          'descripcion': 'Valora los aportes de investigacion que son necesarios para ejercer con efectividad las responsabilidades de un puesto y alcanzar los resultados previstos por la Universidad.',
           'niveles': [
             'Es Renacyt, filia por la Universidad y realiza investigaciones (Nivel Distinguido)',
             'Es Renacyt, filia por la Universidad y realiza investigaciones (Nivel II y I)',
@@ -34,20 +34,12 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Experiencia',
-          'descripcion':
-              'Experiencia comprobada para generar valor al puesto de trabajo, es el desarrollo de sus competencias laborales obtenidas en el cargo ó cargos similares que capacitan a una persona.',
-          'niveles': [
-            '12 años 1 mes a más',
-            '8 años 1 mes - 12 años',
-            '3 años 1 mes - 8 años',
-            '1 año 1 mes - 3 años',
-            'S/Exp. - 1 año',
-          ],
+          'descripcion': 'Experiencia comprobada para generar valor al puesto de trabajo, es el desarrollo de sus competencias laborales obtenidas en el cargo ó cargos similares.',
+          'niveles': ['12 años 1 mes a más', '8 años 1 mes - 12 años', '3 años 1 mes - 8 años', '1 año 1 mes - 3 años', 'S/Exp. - 1 año'],
         },
         {
           'nombre': 'Excelencia de Servicio y Atención al Cliente',
-          'descripcion':
-              'Planifica, organiza y ejecuta acciones para superar las expectativas de su cliente externo e interno, satisface al cliente y adopta estrategias y tácticas para brindarle el mejor servicio/producto, anticipando sus necesidades.',
+          'descripcion': 'Planifica, organiza y ejecuta acciones para superar las expectativas de su cliente externo e interno.',
           'niveles': [
             'Capacidad estratégica para atender las necesidades de servicio de los clientes, otorgando en cada contacto un servicio Wow, de alta calidad.',
             'Capacidad de atención con rapidez e Identifica las necesidades del cliente.',
@@ -58,22 +50,20 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Capacidad Resolutiva o Solución de Problemas',
-          'descripcion':
-              'Capacidad de pensamiento requerido en un puesto en forma de analisis, razonamiento, evaluación, creatividad, en la aplicacion de solución de problemas que requiere el puesto de trabajo.',
+          'descripcion': 'Capacidad de pensamiento requerido en un puesto en forma de analisis, razonamiento, evaluación, creatividad, en la aplicacion de solución de problemas.',
           'niveles': [
-            'Capacidad para impulsar entornos favorables, que propicien el desarrollo institucional, condiciones de mercado, crecimiento empresarial, desarrollando de manera continua ventajas competitivas.',
-            'Capacidad de pensamiento estratégico, establece un fin, evalúa medios útiles y logra aplicación, obteniendo el máximo beneficio.',
+            'Capacidad para impulsar entornos favorables, que propicien el desarrollo institucional y ventajas competitivas.',
+            'Capacidad de pensamiento estratégico, establece un fin, evalúa medios útiles y logra aplicación.',
             'Capacidad de respuesta ante los cambios del entorno laboral y solución de problemas.',
-            'Capacidad de pensamiento para adaptarse a los cambios del entorno, detectando nuevas oportunidades que aporten al desarrollo de la Universidad.',
+            'Capacidad de pensamiento para adaptarse a los cambios del entorno.',
             'Competencia no desarrollada para la posición.',
           ],
         },
         {
           'nombre': 'Emprendimiento / Intra-Emprendimiento',
-          'descripcion':
-              'Creación de valor que permite a la comunidad universitaria proponer espacios y escenarios de formación para construir conocimientos y desarrollar hábitos, actitudes y valores necesarios para generar acciones orientadas al mejoramiento personal y a la transformación del entorno y de la sociedad.',
+          'descripcion': 'Creación de valor que permite a la comunidad universitaria proponer espacios de formación para construir conocimientos y desarrollar hábitos.',
           'niveles': [
-            'Capacidad de generar, promover, fomentar y mantener nuevos proyectos innovadores dentro de la universidad y es capaz de liderarlos exitosamente.',
+            'Capacidad de generar, promover, fomentar y mantener nuevos proyectos innovadores y liderarlos exitosamente.',
             'Capacidad de asumir con propiedad el rol y fomenta las nuevas ideas y la creación de nuevos proyectos.',
             'Capacidad de plantear ideas, proyectos innovadores, retadores.',
             'Capacidad minima para asumir su rol.',
@@ -82,23 +72,21 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Innovación',
-          'descripcion':
-              'Capacidad y habilidad mental para implementar nuevos proyectos, estrategias, ideas y conceptos a esquemas existentes, transformándo el entorno laboral.',
+          'descripcion': 'Capacidad y habilidad mental para implementar nuevos proyectos, estrategias, ideas y conceptos a esquemas existentes.',
           'niveles': [
-            'Planifica, organiza e implementa ideas innovadoras que se concretan en realidades tangibles que agregan alto valor a la organización.',
-            'Capacidad de aportar ideas interesantes por un enfoque innovador, que son útiles para nuevos proyectos.',
+            'Planifica, organiza e implementa ideas innovadoras que agregan alto valor a la organización.',
+            'Capacidad de aportar ideas interesantes por un enfoque innovador para nuevos proyectos.',
             'Capacidad de implementar nuevos proyectos e ideas innovadoras.',
-            'Capacidad de aporte minimo de implementacion de nuevos proyectos, ideas innovadoras.',
+            'Capacidad de aporte minimo de implementacion de nuevos proyectos.',
             'Competencia no desarrollada para la posición.',
           ],
         },
         {
           'nombre': 'Competencia Digital',
-          'descripcion':
-              'Capacidad del uso creativo, crítico y seguro de las tecnologías de la información, herramientas digitales y la comunicación para alcanzar los objetivos relacionados con el trabajo.',
+          'descripcion': 'Capacidad del uso creativo, crítico y seguro de las tecnologías de la información y herramientas digitales.',
           'niveles': [
-            'Planifica, organiza y dirige estrategias de tecnologia de la información para alcanzar objetivos de conocimiento tácito y explícito.',
-            'Capacidad de hacer el uso óptimo de la tecnología y herramientas digitales, que implica el uso crítico y seguro de las herramientas en el puesto de trabajo.',
+            'Planifica, organiza y dirige estrategias de tecnologia de la información para alcanzar objetivos.',
+            'Capacidad de hacer el uso óptimo de la tecnología y herramientas digitales.',
             'Capacidad para el entendimiento y manejo de los sistemas informáticos.',
             'Capacidad minima en el manejo y entendimiento de programas digitales.',
             'Competencia no desarrollada para la posición.',
@@ -111,32 +99,29 @@ class ValorizacionScreen extends StatelessWidget {
       'subfactores': [
         {
           'nombre': 'Mental',
-          'descripcion':
-              'Es el conjunto de tensiones inducidas en una persona por las exigencias del trabajo mental que realiza en un puesto de trabajo en relación al procesamiento de información del entorno a partir de los conocimientos previos.',
+          'descripcion': 'Conjunto de tensiones inducidas en una persona por las exigencias del trabajo mental que realiza en un puesto de trabajo.',
           'niveles': [
-            'Planifica, organiza e implementa acciones estratégicas que requieren la aplicacion de las funciones intelectuales superiores.',
-            'El trabajo exige alta concentración y el uso de conocimientos y habilidades para el logro del objetivo del puesto.',
-            'El trabajo exige concentración y el uso de conocimientos y habilidades para el logro del objetivo del puesto.',
+            'Planifica, organiza e implementa acciones estratégicas que requieren la aplicacion de funciones intelectuales superiores.',
+            'El trabajo exige alta concentración y el uso de conocimientos y habilidades para el logro del objetivo.',
+            'El trabajo exige concentración y el uso de conocimientos y habilidades.',
             'El trabajo a ejecutar es práctico-mecanico.',
-            'El trabajo sólo exige un mínimo de esfuerzo de concentración y habilidades.',
+            'El trabajo sólo exige un mínimo de esfuerzo de concentración.',
           ],
         },
         {
           'nombre': 'Emocional',
-          'descripcion':
-              'Controlar las propias emociones en situaciones de estrés, presión e incertidumbre.',
+          'descripcion': 'Controlar las propias emociones en situaciones de estrés, presión e incertidumbre.',
           'niveles': [
-            'El puesto requiere de estrategias para el manejo y control de emociones personales y del equipo de trabajo.',
-            'El puesto labora en un ambiente donde existe un nivel constante y elevado de presión, estrés e incertidumbre.',
-            'El puesto labora en un ambiente donde existe un nivel constante de presión, estrés e incertidumbre.',
-            'El puesto opera en un entorno que en general tiene bajos niveles de estrés y presión.',
+            'El puesto requiere de estrategias para el manejo y control de emociones personales y del equipo.',
+            'El puesto labora en un ambiente con nivel constante y elevado de presión, estrés e incertidumbre.',
+            'El puesto labora en un ambiente con nivel constante de presión, estrés e incertidumbre.',
+            'El puesto opera en un entorno con bajos niveles de estrés y presión.',
             'El puesto opera en un entorno psicológico libre de presión e incertidumbre.',
           ],
         },
         {
           'nombre': 'Físico',
-          'descripcion':
-              'Es la carga física de trabajo, conjunto de requerimientos físicos a los que se ve sometida la persona que ocupa un puesto determinado a lo largo de la jornada laboral.',
+          'descripcion': 'Conjunto de requerimientos físicos a los que se ve sometida la persona que ocupa un puesto a lo largo de la jornada laboral.',
           'niveles': [
             'Ejerce estrategias para el uso eficiente del trabajo fisico personal y del equipo.',
             'Ejerce esfuerzo físico de manera constante.',
@@ -152,8 +137,7 @@ class ValorizacionScreen extends StatelessWidget {
       'subfactores': [
         {
           'nombre': 'Cumplimiento de Metas',
-          'descripcion':
-              'Es el resultado deseado que una persona o un sistema diseña, planea y ejecuta logrando resultados eficientes en cada meta de su posición.',
+          'descripcion': 'Resultado deseado que una persona o un sistema diseña, planea y ejecuta logrando resultados eficientes.',
           'niveles': [
             'Planifica y organiza estrategias para el cumplimiento eficaz y eficiente de las metas.',
             'Demuestra resultados en las tareas asignadas, cumpliendo con cada meta propuesta.',
@@ -164,8 +148,7 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Responsabilidades Financieras',
-          'descripcion':
-              'Gestión y decisión sobre las magnitudes o presupuestos asignados, tambien incluye el pago de transacciones grandes o el tener libros contables.',
+          'descripcion': 'Gestión y decisión sobre las magnitudes o presupuestos asignados, incluyendo pago de transacciones y libros contables.',
           'niveles': [
             'Planifica, organiza e implementa estrategias para el manejo de los recursos financeiros de la Universidad.',
             'Capacidad eficiente para el manejo de los recursos financieros de la Universidad.',
@@ -176,23 +159,21 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Prestación de Servicios',
-          'descripcion':
-              'Planifica, organiza, dirige, controla y evalua actividades relaciones con la formación integral de los estudiantes universitarios.',
+          'descripcion': 'Planifica, organiza, dirige, controla y evalua actividades relaciones con la formación integral de los estudiantes.',
           'niveles': [
             'Planifica, organiza, dirige y controla los recursos como aulas, docentes, alumnos, etc.',
             'Capacidad del manejo eficiente de los recursos como aulas, docentes, alumnos, etc.',
-            'Capacidad para la atencion y utilizacion de recursos como aulas, docentes, alumnos, etc.',
-            'Capacidad minima para la atencion y utilizacion de recursos de las necesidades de los alumnos.',
+            'Capacidad para la atencion y utilizacion de recursos como aulas, docentes, alumnos.',
+            'Capacidad minima para la atencion de las necesidades de los alumnos.',
             'Competencia no desarrollada para la posición.',
           ],
         },
         {
           'nombre': 'Confidencialidad',
-          'descripcion':
-              'Es la capacidad de garantizar que la información de su puesto de trabajo y de la Universidad, no sea protegida y divulgada en el entorno sin los permisos y autorizaciones pertinentes.',
+          'descripcion': 'Capacidad de garantizar que la información del puesto y de la Universidad no sea divulgada sin los permisos pertinentes.',
           'niveles': [
-            'Planifica, organiza e implementa estrategia para la proteccion de la informacion confidencial de la Universidad.',
-            'Capacidad de gestionar la información confidencial, custodia y protege el buen uso de la misma.',
+            'Planifica, organiza e implementa estrategia para la proteccion de la informacion confidencial.',
+            'Capacidad de gestionar la información confidencial, custodia y protege el buen uso.',
             'Capacidad de manejar y guardar información confidencial de la Universidad.',
             'Capacidad de manejar informacion de la Universidad.',
             'Competencia no desarrollada para la posición.',
@@ -200,25 +181,23 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Manejo de Materiales, Financieros y Tecnológicos',
-          'descripcion':
-              'Es el uso eficiente de los recursos financieros, tecnologicos y materiales que utiliza el puesto para el desarrollo de las funciones establecidas.',
+          'descripcion': 'Uso eficiente de los recursos financieros, tecnologicos y materiales para el desarrollo de las funciones establecidas.',
           'niveles': [
-            'Planifica, organiza e implementa estrategia para el manejo eficiente de los materiales, recursos financieros y tecnologicos que entrega la Universidad.',
-            'Capacidad del manejo eficiente de los materiales, recursos financieros y tecnologicos que entrega la Universidad.',
-            'Capacidad del manejo de los materiales, recursos financieros y tecnologicos que entrega la Universidad.',
+            'Planifica, organiza e implementa estrategia para el manejo eficiente de los materiales y recursos.',
+            'Capacidad del manejo eficiente de los materiales, recursos financieros y tecnologicos.',
+            'Capacidad del manejo de los materiales, recursos financieros y tecnologicos.',
             'Capacidad minima del manejo de los materiales que le brinda la Universidad.',
             'Competencia no desarrollada para la posición.',
           ],
         },
         {
           'nombre': 'Manejo de Personas',
-          'descripcion':
-              'Es la asignación de un grupo de personas, para gestionar sus habilidades a fin de cumplir las funciones asignadas.',
+          'descripcion': 'Asignación de un grupo de personas para gestionar sus habilidades a fin de cumplir las funciones asignadas.',
           'niveles': [
-            'Planifica, organiza e implementa estrategías para el manejo del personal, alumnos y otros, para la consolidacion de los objetivos estratégicos de la Universidad.',
-            'Trabaja e influye en un grupo de personas (21-40 colaboradores), para el logro de las metas y objetivos en el area desarrollada.',
-            'Trabaja e influye en un grupo de personas (6-20 colaboradores), para el logro de las metas y objetivos en el area desarrollada.',
-            'Trabaja e influye con un pequeño grupo de personas (1-5 colaboradores), para el logro de las metas y objetivos en el area desarrollada.',
+            'Planifica, organiza e implementa estrategías para el manejo del personal y consolidacion de objetivos estratégicos.',
+            'Trabaja e influye en un grupo de personas (21-40 colaboradores) para el logro de metas.',
+            'Trabaja e influye en un grupo de personas (6-20 colaboradores) para el logro de metas.',
+            'Trabaja e influye con un pequeño grupo de personas (1-5 colaboradores).',
             'No trabaja con personas a su cargo.',
           ],
         },
@@ -229,8 +208,7 @@ class ValorizacionScreen extends StatelessWidget {
       'subfactores': [
         {
           'nombre': 'Físico - Riesgos Ambientales',
-          'descripcion':
-              'Es un agente, factor o circunstancia que puede causar daño físico al colaborador.',
+          'descripcion': 'Agente, factor o circunstancia que puede causar daño físico al colaborador.',
           'niveles': [
             'El puesto representa un alto riesgo fisico - ambiental para el colaborador.',
             'El puesto representa un significativo riesgo fisico - ambiental para el colaborador.',
@@ -241,8 +219,7 @@ class ValorizacionScreen extends StatelessWidget {
         },
         {
           'nombre': 'Riesgo Psicológico',
-          'descripcion':
-              'Es cuando no se puede preveer las consecuencias de los estimulos que se presentan en el puesto trabajo (Objeto, situación, persona).',
+          'descripcion': 'Cuando no se puede preveer las consecuencias de los estimulos que se presentan en el puesto trabajo.',
           'niveles': [
             'El puesto representa un alto riesgo psicológico para el colaborador.',
             'El puesto representa un significativo riesgo psicológico para el colaborador.',
@@ -257,213 +234,378 @@ class ValorizacionScreen extends StatelessWidget {
 
   Color _colorFactor(String factor) {
     switch (factor) {
-      case 'CALIFICACIONES Y COMPETENCIAS':
-        return const Color(0xFF6B2D8B);
-      case 'ESFUERZO':
-        return const Color(0xFF2196F3);
-      case 'RESPONSABILIDAD':
-        return const Color(0xFF7DC242);
-      case 'CONDICIONES DE TRABAJO':
-        return const Color(0xFFFF9800);
-      default:
-        return Colors.grey;
+      case 'CALIFICACIONES Y COMPETENCIAS': return const Color(0xFF6B2D8B);
+      case 'ESFUERZO':                       return const Color(0xFF2196F3);
+      case 'RESPONSABILIDAD':                return const Color(0xFF7DC242);
+      case 'CONDICIONES DE TRABAJO':         return const Color(0xFFFF9800);
+      default:                               return Colors.grey;
     }
+  }
+
+  IconData _iconFactor(String factor) {
+    switch (factor) {
+      case 'CALIFICACIONES Y COMPETENCIAS': return Icons.psychology_rounded;
+      case 'ESFUERZO':                       return Icons.fitness_center_rounded;
+      case 'RESPONSABILIDAD':                return Icons.assignment_turned_in_rounded;
+      case 'CONDICIONES DE TRABAJO':         return Icons.health_and_safety_rounded;
+      default:                               return Icons.circle;
+    }
+  }
+
+  Color _colorNivel(int nivel, Color base) {
+    final opacities = [1.0, 0.80, 0.60, 0.40, 0.25];
+    return base.withOpacity(opacities[nivel]);
+  }
+
+  void _toggle(String key) {
+    setState(() {
+      _expanded[key] = !(_expanded[key] ?? false);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF4F0F8),
       body: Column(
         children: [
-          Container(
-            color: const Color(0xFF6B2D8B),
-            padding: const EdgeInsets.only(
-              top: 50,
-              left: 20,
-              right: 20,
-              bottom: 16,
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTitulo(),
+                  const SizedBox(height: 16),
+                  for (int fi = 0; fi < _factores.length; fi++) ...[
+                    _buildFactorBanner(_factores[fi]),
+                    const SizedBox(height: 10),
+                    for (int si = 0; si < (_factores[fi]['subfactores'] as List).length; si++) ...[
+                      _buildSubfactorCard(
+                        _factores[fi]['subfactores'][si],
+                        _colorFactor(_factores[fi]['factor']),
+                        '$fi-$si',
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    const SizedBox(height: 6),
+                  ],
+                ],
+              ),
             ),
-            child: Row(
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF3A1060), Color(0xFF6B2D8B), Color(0xFF9C4DBC)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 16,
+        right: 16,
+        bottom: 20,
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white, size: 18),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+            ),
+            child: Center(
+              child: Text(
+                widget.nombres.isNotEmpty ? widget.nombres[0].toUpperCase() : 'U',
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
                 Text(
-                  'Hola ${nombres.split(' ').first}',
+                  'Hola, ${widget.nombres.split(' ').first}',
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Text(
+                  'Valorización de Puestos',
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'OBJETIVOS PARA LA VALORIZACIÓN DE PUESTOS',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  for (final factor in _factores) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: _colorFactor(factor['factor']).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border(
-                          left: BorderSide(
-                            color: _colorFactor(factor['factor']),
-                            width: 4,
-                          ),
-                        ),
-                      ),
+          Stack(children: [
+            Container(width: 50, height: 50,
+              decoration: BoxDecoration(shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.05))),
+            Positioned(top: 8, left: 8,
+              child: Container(width: 34, height: 34,
+                decoration: BoxDecoration(shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.08)))),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTitulo() {
+    return Row(
+      children: [
+        Container(
+          width: 4, height: 20,
+          decoration: BoxDecoration(
+              color: const Color(0xFF6B2D8B),
+              borderRadius: BorderRadius.circular(2)),
+        ),
+        const SizedBox(width: 8),
+        const Flexible(
+          child: Text(
+            'Objetivos para la Valorización de Puestos',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: Color(0xFF3A1060)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFactorBanner(Map<String, dynamic> factor) {
+    final color = _colorFactor(factor['factor']);
+    final icon = _iconFactor(factor['factor']);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color, color.withOpacity(0.7)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              factor['factor'],
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubfactorCard(Map<String, dynamic> sf, Color color, String key) {
+    final niveles = sf['niveles'] as List;
+    final isOpen = _expanded[key] ?? false;
+
+    return GestureDetector(
+      onTap: () => _toggle(key),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(isOpen ? 0.15 : 0.07),
+              blurRadius: isOpen ? 14 : 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header siempre visible — tappable
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isOpen ? color.withOpacity(0.12) : color.withOpacity(0.07),
+                  border: Border(left: BorderSide(color: color, width: 4)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
                       child: Text(
-                        factor['factor'],
+                        sf['nombre'],
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: _colorFactor(factor['factor']),
-                        ),
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13),
                       ),
                     ),
-                    for (final sf in factor['subfactores'] as List) ...[
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border(
-                            left: BorderSide(
-                              color: _colorFactor(factor['factor']),
-                              width: 3,
-                            ),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _colorFactor(factor['factor']),
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(9),
-                                  topRight: Radius.circular(12),
-                                ),
-                              ),
-                              child: Text(
-                                sf['nombre'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Text(
-                                sf['descripcion'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: Text(
-                                      'Descripción',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                        color: _colorFactor(factor['factor']),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    'Niveles',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: _colorFactor(factor['factor']),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(),
-                            for (
-                              int i = 0;
-                              i < (sf['niveles'] as List).length;
-                              i++
-                            )
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        sf['niveles'][i],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      width: 28,
-                                      height: 28,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: _colorFactor(factor['factor']),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Text(
-                                        '${5 - i}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ],
+                    AnimatedRotation(
+                      turns: isOpen ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Icon(Icons.keyboard_arrow_down_rounded,
+                          color: color, size: 22),
+                    ),
                   ],
-                ],
+                ),
+              ),
+
+              // Contenido colapsable
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 280),
+                crossFadeState: isOpen
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                firstChild: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Descripción
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+                      child: Text(
+                        sf['descripcion'],
+                        style: TextStyle(
+                            fontSize: 11.5,
+                            color: Colors.grey.shade600,
+                            height: 1.4),
+                      ),
+                    ),
+                    // Separador con label
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Row(
+                        children: [
+                          Text('Niveles',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: color)),
+                          const SizedBox(width: 8),
+                          Expanded(child: Divider(color: color.withOpacity(0.2))),
+                          const SizedBox(width: 8),
+                          Text('Grado',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: color)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Filas de niveles
+                    for (int i = 0; i < niveles.length; i++)
+                      _buildNivelRow(
+                          niveles[i], 5 - i, color, i == niveles.length - 1),
+                    const SizedBox(height: 10),
+                  ],
+                ),
+                secondChild: const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNivelRow(String texto, int grado, Color color, bool isLast) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: (5 - grado) % 2 == 0
+            ? const Color(0xFFFAF8FC)
+            : Colors.white,
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(color: Colors.grey.shade100)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Badge de grado
+          Container(
+            width: 30, height: 30,
+            decoration: BoxDecoration(
+              color: _colorNivel(5 - grado, color),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                '$grado',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Texto del nivel
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
+                texto,
+                style: TextStyle(
+                    fontSize: 11.5,
+                    color: const Color(0xFF333333),
+                    height: 1.4),
               ),
             ),
           ),

@@ -16,15 +16,37 @@ class TrabajadorScreen extends StatefulWidget {
   State<TrabajadorScreen> createState() => _TrabajadorScreenState();
 }
 
-class _TrabajadorScreenState extends State<TrabajadorScreen> {
+class _TrabajadorScreenState extends State<TrabajadorScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _perfil;
   String nombres = '';
   bool _loading = true;
 
+  AnimationController? _animController;
+  Animation<double> _fadeAnim = const AlwaysStoppedAnimation(1.0);
+
+  static const Color _purple     = Color(0xFF6B2D8B);
+  static const Color _purpleLight = Color(0xFF9C4DBB);
+  static const Color _purpleDark  = Color(0xFF4A1D62);
+  static const Color _green      = Color(0xFF7DC242);
+  static const Color _greenDark  = Color(0xFF5A9B2A);
+  static const Color _bg         = Color(0xFFF4F0F8);
+
   @override
   void initState() {
     super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animController!, curve: Curves.easeOut);
     _cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _animController?.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarDatos() async {
@@ -35,6 +57,7 @@ class _TrabajadorScreenState extends State<TrabajadorScreen> {
       nombres = prefs.getString('nombres') ?? '';
       _loading = false;
     });
+    _animController?.forward();
   }
 
   Future<void> _logout() async {
@@ -63,340 +86,441 @@ class _TrabajadorScreenState extends State<TrabajadorScreen> {
   @override
   Widget build(BuildContext context) {
     final clasificacion = _perfil?['clasificacion'];
-    final contrato = _perfil?['contrato'];
-    final salario = contrato?['remuneracion'] ?? '0.00';
+    final contrato     = _perfil?['contrato'];
+    final salario      = contrato?['remuneracion'] ?? '0.00';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0EDF5),
+      backgroundColor: _bg,
       body: Column(
         children: [
-          // Header con gradiente
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF4A1570), Color(0xFF6B2D8B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          _buildHeader(clasificacion, contrato, salario),
+          if (_loading)
+            const Expanded(
+              child: Center(child: CircularProgressIndicator(color: _purple)),
+            )
+          else
+            Expanded(
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildIndicadores(clasificacion, contrato, salario),
+                      const SizedBox(height: 16),
+                      _buildSectionLabel('Mi Portal Remunerativo'),
+                      const SizedBox(height: 20),
+                      _buildGrid(),
+                    ],
+                  ),
+                ),
               ),
             ),
-            padding: const EdgeInsets.only(top: 50, left: 20, right: 16, bottom: 24),
+        ],
+      ),
+    );
+  }
+
+  // ─── HEADER ────────────────────────────────────────────────────────────────
+  Widget _buildHeader(dynamic clasificacion, dynamic contrato, dynamic salario) {
+    final firstName = _formatearNombre(nombres).split(' ').first;
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_purpleDark, _purple, _purpleLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        left: 20,
+        right: 12,
+        bottom: 20,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46, height: 46,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.18),
+              border: Border.all(color: Colors.white38, width: 1.5),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              firstName.isNotEmpty ? firstName[0].toUpperCase() : '?',
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '¡Hola, $firstName!',
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Portal del Trabajador · USS',
+                  style: TextStyle(color: Colors.white.withOpacity(0.72), fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_outline_rounded, color: Colors.white),
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => PerfilScreen(nombres: nombres))),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            onPressed: _logout,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── INDICADORES ───────────────────────────────────────────────────────────
+  Widget _buildIndicadores(dynamic clasificacion, dynamic contrato, dynamic salario) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _purple.withOpacity(0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4, height: 18,
+                decoration: BoxDecoration(
+                    color: _purple, borderRadius: BorderRadius.circular(4)),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Mi Información',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF1A1A2E)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  value: 'S/ $salario',
+                  label: 'Mi Salario',
+                  icon: Icons.attach_money_rounded,
+                  color: _purple,
+                  bgColor: _purple.withOpacity(0.08),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildStatCard(
+                  value: clasificacion?['nivel'] ?? 'N/A',
+                  label: 'Mi Nivel',
+                  icon: Icons.workspace_premium_rounded,
+                  color: _green,
+                  bgColor: _green.withOpacity(0.09),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Puesto y categoría
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: _purple.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Bienvenido,', style: TextStyle(color: Colors.white60, fontSize: 13)),
-                        Text(
-                          _formatearNombre(nombres),
-                          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: _purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.work_outline_rounded,
+                          color: _purple, size: 18),
                     ),
-                    Row(
-                      children: [
-                        _headerBtn(Icons.person_outline, () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => PerfilScreen(nombres: nombres)));
-                        }),
-                        const SizedBox(width: 8),
-                        _headerBtn(Icons.logout_rounded, _logout),
-                      ],
-                    ),
-                  ],
-                ),
-                if (!_loading) ...[
-                  const SizedBox(height: 16),
-                  // Info rápida en el header
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _headerInfo(
-                            Icons.work_outline,
-                            'Puesto',
-                            contrato?['cargo'] ?? 'N/A',
-                          ),
-                        ),
-                        Container(width: 1, height: 36, color: Colors.white24),
-                        Expanded(
-                          child: _headerInfo(
-                            Icons.attach_money,
-                            'Salario',
-                            'S/ $salario',
-                          ),
-                        ),
-                        Container(width: 1, height: 36, color: Colors.white24),
-                        Expanded(
-                          child: _headerInfo(
-                            Icons.workspace_premium_outlined,
-                            'Nivel',
-                            '${clasificacion?['nivel'] ?? 'N/A'}',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          if (_loading)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Título sección
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4, bottom: 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Mi Portal Remunerativo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D1040))),
-                          Text('USS · Selecciona una opción', style: TextStyle(fontSize: 12, color: Colors.black45)),
-                        ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        contrato?['cargo'] ?? 'Sin cargo asignado',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Color(0xFF1A1A2E)),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
-                    // Grid de módulos
-                    GridView.count(
-                      crossAxisCount: 2,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.05,
-                      children: [
-                        _moduloCard(
-                          titulo: 'Mi Puesto y Salario',
-                          subtitulo: 'Posición y banda salarial',
-                          icono: Icons.payments_outlined,
-                          colorIcon: const Color(0xFF7DC242),
-                          colorBg: const Color(0xFFEEF7E5),
-                          colorCard: const Color(0xFF6B2D8B),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MiPuestoSalarioScreen(nombres: nombres))),
-                        ),
-                        _moduloCard(
-                          titulo: 'Valoración de Puestos',
-                          subtitulo: 'Puntos y factores',
-                          icono: Icons.star_outline_rounded,
-                          colorIcon: const Color(0xFF7DC242),
-                          colorBg: const Color(0xFFEEF7E5),
-                          colorCard: const Color(0xFF4A1570),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ValoracionPuestosScreen(nombres: nombres))),
-                        ),
-                        _moduloCard(
-                          titulo: 'Mi Historial',
-                          subtitulo: 'Evolución salarial',
-                          icono: Icons.timeline_outlined,
-                          colorIcon: const Color(0xFF7DC242),
-                          colorBg: const Color(0xFFEEF7E5),
-                          colorCard: const Color(0xFF6B2D8B),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => HistorialScreen(nombres: nombres))),
-                        ),
-                        _moduloCard(
-                          titulo: 'Beneficios',
-                          subtitulo: 'Beneficios laborales',
-                          icono: Icons.card_giftcard_outlined,
-                          colorIcon: const Color(0xFF7DC242),
-                          colorBg: const Color(0xFFEEF7E5),
-                          colorCard: const Color(0xFF4A1570),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(
-                            builder: (_) => BeneficiosScreen(nombres: nombres, mostrarBotonAgregar: false),
-                          )),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Card departamento
-Container(
-  padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(16),
-    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))],
-  ),
-  child: Column(
-    children: [
-      Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0EDF5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.business_outlined, color: Color(0xFF6B2D8B), size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Departamento', style: TextStyle(fontSize: 11, color: Colors.black45)),
-                Text(
-                  contrato?['departamento'] ?? 'N/A',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2D1040)),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 12),
-      const Divider(height: 1),
-      const SizedBox(height: 12),
-      Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEF7E5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.description_outlined, color: Color(0xFF7DC242), size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Tipo de Contrato', style: TextStyle(fontSize: 11, color: Colors.black45)),
-                Text(
-                  contrato?['tipo_contrato'] ?? 'N/A',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF7DC242)),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ],
-  ),
-),
                   ],
                 ),
-              ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Badge categoría
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        clasificacion?['categoria'] ?? '',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: _purple),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    // Badge tipo contrato — flexible para no desbordar
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _green.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          contrato?['tipo_contrato'] ?? '',
+                          style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: _greenDark),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _headerBtn(IconData icono, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icono, color: Colors.white, size: 22),
+  Widget _buildStatCard({
+    required String value,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 30),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                      height: 1.1),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: color.withOpacity(0.75),
+                      fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _headerInfo(IconData icono, String label, String valor) {
-    return Column(
+  // ─── SECTION LABEL ─────────────────────────────────────────────────────────
+  Widget _buildSectionLabel(String text) {
+    return Row(
       children: [
-        Icon(icono, color: Colors.white70, size: 16),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10)),
-        const SizedBox(height: 2),
+        Container(
+          width: 4, height: 18,
+          decoration: BoxDecoration(
+              color: _purple, borderRadius: BorderRadius.circular(4)),
+        ),
+        const SizedBox(width: 10),
         Text(
-          valor,
-          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          text,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: Color(0xFF1A1A2E)),
         ),
       ],
     );
   }
 
-  Widget _moduloCard({
-    required String titulo,
-    required String subtitulo,
-    required IconData icono,
-    required Color colorIcon,
-    required Color colorBg,
-    required Color colorCard,
-    required VoidCallback onTap,
-  }) {
+  // ─── GRID ──────────────────────────────────────────────────────────────────
+  Widget _buildGrid() {
+    final modulos = [
+      _ModuloData(
+        titulo: 'Mi Puesto\ny Salario',
+        icono: Icons.payments_outlined,
+        color: _purple,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => MiPuestoSalarioScreen(nombres: nombres))),
+      ),
+      _ModuloData(
+        titulo: 'Valoración\nde Puestos',
+        icono: Icons.star_outline_rounded,
+        color: _purpleDark,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => ValoracionPuestosScreen(nombres: nombres))),
+      ),
+      _ModuloData(
+        titulo: 'Mi Historial',
+        icono: Icons.timeline_outlined,
+        color: _purpleLight,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => HistorialScreen(nombres: nombres))),
+      ),
+      _ModuloData(
+        titulo: 'Beneficios',
+        icono: Icons.card_giftcard_outlined,
+        color: _green,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(
+                builder: (_) => BeneficiosScreen(nombres: nombres, mostrarBotonAgregar: false))),
+      ),
+    ];
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth   = (screenWidth - 40 - 14) / 2;
+    final cardHeight  = cardWidth / 1.55;
+
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        mainAxisExtent: cardHeight,
+      ),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: modulos.length,
+      itemBuilder: (_, i) => _buildModuloCard(modulos[i]),
+    );
+  }
+
+  Widget _buildModuloCard(_ModuloData m) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: m.onTap,
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [colorCard, colorCard.withOpacity(0.85)],
+            colors: [m.color, m.color.withOpacity(0.78)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: colorCard.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: m.color.withOpacity(0.28),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
-            // Círculo decorativo
             Positioned(
-              right: -15,
-              top: -15,
+              right: -15, top: -15,
               child: Container(
-                width: 80,
-                height: 80,
+                width: 80, height: 80,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.07),
                   shape: BoxShape.circle,
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: colorBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icono, color: colorIcon, size: 22),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(titulo, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                      const SizedBox(height: 3),
-                      Text(subtitulo, style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 11)),
-                    ],
-                  ),
-                ],
-              ),
+                  child: Icon(m.icono, color: Colors.white, size: 24),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  m.titulo,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      height: 1.3),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class _ModuloData {
+  final String titulo;
+  final IconData icono;
+  final Color color;
+  final VoidCallback onTap;
+  const _ModuloData({
+    required this.titulo,
+    required this.icono,
+    required this.color,
+    required this.onTap,
+  });
 }

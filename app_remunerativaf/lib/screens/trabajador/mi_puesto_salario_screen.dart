@@ -93,6 +93,17 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
     }).toList();
   }
 
+  String _formatearFecha(String fecha) {
+    if (fecha.isEmpty) return 'N/A';
+    try {
+      final partes = fecha.split('-');
+      if (partes.length == 3) {
+        return '${partes[2]}/${partes[1]}/${partes[0]}';
+      }
+    } catch (_) {}
+    return fecha;
+  }
+
   @override
   Widget build(BuildContext context) {
     final clasificacion = _perfil?['clasificacion'];
@@ -248,7 +259,7 @@ class _MiPuestoSalarioScreenState extends State<MiPuestoSalarioScreen> {
                               const Divider(height: 20),
                               _infoRow(Icons.description_outlined, 'Tipo de Contrato', contrato?['tipo_contrato'] ?? 'N/A'),
                               const Divider(height: 20),
-                              _infoRow(Icons.calendar_today_outlined, 'Fecha de Ingreso', contrato?['fecha_ingreso'] ?? 'N/A'),
+                              _infoRow(Icons.calendar_today_outlined, 'Fecha de Ingreso', _formatearFecha(contrato?['fecha_ingreso'] ?? '')),
                             ],
                           ),
                         ),
